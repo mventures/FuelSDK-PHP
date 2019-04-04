@@ -276,7 +276,7 @@ class ET_Client extends SoapClient
 				//echo "auth:  \n";
 				//print_r($authResponse);
 				
-				if ($authResponse && property_exists($authObject,"accessToken")){		
+				if ($authResponse && $authObject && property_exists($authObject,"accessToken")){
 					$dv = new DateInterval('PT'.$authObject->expiresIn.'S');
 					$newexpTime = new DateTime();
 					$this->setAuthToken($this->tenantKey, $authObject->accessToken, $newexpTime->add($dv));
