@@ -85,7 +85,25 @@ class ET_DataExtension_Row extends ET_CUDWithUpsertSupport
 		$this->props = $originalProps;
 		return $response;
 	}
-	
+
+    public function put(){
+        $this->getCustomerKey();
+        $originalProps = $this->props;
+        $overrideProps = array();
+        $fields = array();
+
+        foreach ($this->props as $key => $value){
+            $fields[]  = array("Name" => $key, "Value" => $value);
+        }
+        $overrideProps['CustomerKey'] = $this->CustomerKey;
+        $overrideProps['Properties'] = array("Property"=> $fields);
+
+        $this->props = $overrideProps;
+        $response = parent::put();
+        $this->props = $originalProps;
+        return $response;
+    }
+
     /**
 	* Delete this instance.
     * @return ET_Delete     Object of type ET_Delete which contains http status code, response, etc from the DELETE SOAP service
