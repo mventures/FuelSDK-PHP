@@ -30,7 +30,11 @@ class ET_Util
         
         // Need to set ReturnTransfer to True in order to store the result in a variable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        
+
+        //Set timeout options
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
         // Disable VerifyPeer for SSL
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, self::shouldVerifySslPeer($authStub->sslVerifyPeer));
 
@@ -84,7 +88,11 @@ class ET_Util
         
         //Need to set ReturnTransfer to True in order to store the result in a variable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        
+
+        //Set timeout options
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
         // Disable VerifyPeer for SSL
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, self::shouldVerifySslPeer($authStub->sslVerifyPeer));
 
@@ -136,7 +144,11 @@ class ET_Util
         
         //Need to set ReturnTransfer to True in order to store the result in a variable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        
+
+        //Set timeout options
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
         //Need to set the request to be a PATCH
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PATCH" ); 
             
@@ -190,7 +202,11 @@ class ET_Util
         
         //Need to set ReturnTransfer to True in order to store the result in a variable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        
+
+        //Set timeout options
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
         //Need to set the request to be a PATCH
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT" ); 
             
@@ -240,7 +256,11 @@ class ET_Util
         
         // Need to set ReturnTransfer to True in order to store the result in a variable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        
+
+        //Set timeout options
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
         // Disable VerifyPeer for SSL
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, self::shouldVerifySslPeer($authStub->sslVerifyPeer));
         
