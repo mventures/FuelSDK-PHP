@@ -6,7 +6,7 @@ class ET_CacheService
 {
     private $_identifier;
     private $_cacheMinutes = 10;
-    private static $cachedSoapUrls;
+    private static $cachedSoapUrls = [];
 
     public function __construct($clientId, $clientSecret)
     {
@@ -16,7 +16,7 @@ class ET_CacheService
     public function get()
     {
         $now = time();
-        $data = ET_CacheService::$cachedSoapUrls[$this->_identifier];
+        $data = ET_CacheService::$cachedSoapUrls[$this->_identifier] ?? null;
         if (!$data || !$data->expires || $data->expires < $now) {
             // remove expired data from the array
             unset(ET_CacheService::$cachedSoapUrls[$this->_identifier]);
