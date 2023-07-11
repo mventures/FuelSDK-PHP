@@ -61,19 +61,6 @@ class ET_Constructor
 			} else  {
 				$this->message = $requestresponse;
 			}
-
-            if ($this->status == false) {
-                $emailBody = "\n---------------\n";
-                $emailBody .= 'Status: '.($this->status ? 'true' : 'false')."\n";
-                $emailBody .= 'Code: '.$this->code."\n";
-                $emailBody .= 'Message: '.$this->message."\n";
-                $emailBody .= 'Results Length: '. count($this->results)."\n";
-                $emailBody .= 'Results: '."\n";
-                $emailBody .= print_r($this->results, true);
-                $emailBody .= "\n---------------\n";
-
-                mail('philip.asfour@mventures.ca', 'ET API Error', $emailBody);
-            }
 		}
 	}
 }
