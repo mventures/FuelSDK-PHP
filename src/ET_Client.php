@@ -13,6 +13,7 @@ use \DOMDocument;
 use \DOMXPath;
 use \Exception;
 
+
 /**
  * Auto load method to load dependent classes
  */
@@ -67,7 +68,8 @@ class ET_Client extends SoapClient
 
 	private $wsdlLoc, $debugSOAP, $lastHTTPCode, $clientId, 
 			$clientSecret, $appsignature, $endpoint, 
-			$tenantTokens, $tenantKey, $xmlLoc, $baseAuthUrl, $baseSoapUrl;
+			$tenantTokens, $tenantKey, $xmlLoc, $baseAuthUrl, $baseSoapUrl,
+			$useOAuth2Authentication, $accountId, $redirectURI, $applicationType, $authorizationCode, $scope;
 
 	private $defaultBaseSoapUrl = 'https://webservice.exacttarget.com/Service.asmx';
 
@@ -110,7 +112,6 @@ class ET_Client extends SoapClient
 			$this->clientId = $config['clientid'];
 			$this->clientSecret = $config['clientsecret'];
 			$this->appsignature = $config['appsignature'];
-			$this->baseUrl = $config["baseUrl"];
 			$this->baseAuthUrl = $config["baseAuthUrl"];
 			if (array_key_exists('baseSoapUrl', $config)) {
 				if (!empty($config["baseSoapUrl"])) {
@@ -119,6 +120,34 @@ class ET_Client extends SoapClient
 					$this->baseSoapUrl = $this->defaultBaseSoapUrl;
 				}
 			}
+			if(array_key_exists('useOAuth2Authentication', $config)){$this->useOAuth2Authentication = $config['useOAuth2Authentication'];}
+			if(array_key_exists("baseUrl", $config))
+			{
+				$this->baseUrl = $config["baseUrl"];
+			}
+			else
+			{
+				if($this->isNullOrEmptyString($this->useOAuth2Authentication) || $this->useOAuth2Authentication === false) {
+					throw new Exception("baseUrl is null: Must be provided in config file when instantiating ET_Client");
+				}
+			}
+            if (array_key_exists('accountId', $config)){$this->accountId = $config['accountId'];}
+
+            if (array_key_exists('applicationType', $config))
+            {
+            	$this->applicationType = $config['applicationType'];
+            }
+			if (array_key_exists('redirectURI', $config))
+			{
+				$this->redirectURI = $config['redirectURI'];
+			}
+			if (array_key_exists('authorizationCode', $config))
+			{
+				$this->authorizationCode = $config['authorizationCode'];
+			}
+
+            if (array_key_exists('scope', $config)){$this->scope = $config['scope'];}
+
 			if (array_key_exists('xmlloc', $config)){$this->xmlLoc = $config['xmlloc'];}
 
 			if(array_key_exists('proxyhost', $config)){$this->proxyHost = $config['proxyhost'];}
@@ -129,19 +158,19 @@ class ET_Client extends SoapClient
 		} 
 		if ($params) 
 		{
-			if ($params && array_key_exists('defaultwsdl', $params)){$this->wsdlLoc = $params['defaultwsdl'];}
+			if (array_key_exists('defaultwsdl', $params)){$this->wsdlLoc = $params['defaultwsdl'];}
 			else {$this->wsdlLoc = "https://webservice.exacttarget.com/etframework.wsdl";}
-			if ($params && array_key_exists('clientid', $params)){$this->clientId = $params['clientid'];}
-			if ($params && array_key_exists('clientsecret', $params)){$this->clientSecret = $params['clientsecret'];}
-			if ($params && array_key_exists('appsignature', $params)){$this->appsignature = $params['appsignature'];}
-			if ($params && array_key_exists('xmlloc', $params)){$this->xmlLoc = $params['xmlloc'];}
+			if (array_key_exists('clientid', $params)){$this->clientId = $params['clientid'];}
+			if (array_key_exists('clientsecret', $params)){$this->clientSecret = $params['clientsecret'];}
+			if (array_key_exists('appsignature', $params)){$this->appsignature = $params['appsignature'];}
+			if (array_key_exists('xmlloc', $params)){$this->xmlLoc = $params['xmlloc'];}
 
-			if ($params && array_key_exists('proxyhost', $params)){$this->proxyHost = $params['proxyhost'];}
-			if ($params && array_key_exists('proxyport', $params)){$this->proxyPort = $params['proxyport'];}
-			if ($params && array_key_exists('proxyusername', $params)) {$this->proxyUserName = $params['proxyusername'];}
-			if ($params && array_key_exists('proxypassword', $params)) {$this->proxyPassword = $params['proxypassword'];}
-			if ($params && array_key_exists('sslverifypeer', $params)) {$this->sslVerifyPeer = $params['sslverifypeer'];}
-			if ($params && array_key_exists('baseUrl', $params))
+			if (array_key_exists('proxyhost', $params)){$this->proxyHost = $params['proxyhost'];}
+			if (array_key_exists('proxyport', $params)){$this->proxyPort = $params['proxyport'];}
+			if (array_key_exists('proxyusername', $params)) {$this->proxyUserName = $params['proxyusername'];}
+			if (array_key_exists('proxypassword', $params)) {$this->proxyPassword = $params['proxypassword'];}
+			if (array_key_exists('sslverifypeer', $params)) {$this->sslVerifyPeer = $params['sslverifypeer'];}
+			if (array_key_exists('baseUrl', $params))
 			{
 				$this->baseUrl = $params['baseUrl'];
 			}
@@ -149,7 +178,7 @@ class ET_Client extends SoapClient
 			{
 				$this->baseUrl = "https://www.exacttargetapis.com";
 			}
-			if ($params && array_key_exists('baseAuthUrl', $params))
+			if (array_key_exists('baseAuthUrl', $params))
 			{
 				$this->baseAuthUrl = $params['baseAuthUrl'];
 			}
@@ -157,7 +186,7 @@ class ET_Client extends SoapClient
 			{
 				$this->baseAuthUrl = "https://auth.exacttargetapis.com";
 			}
-			if ($params && array_key_exists('baseSoapUrl', $params))
+			if (array_key_exists('baseSoapUrl', $params))
 			{
 				if (!empty($params["baseSoapUrl"])) {
 					$this->baseSoapUrl = $params['baseSoapUrl'];
@@ -165,14 +194,55 @@ class ET_Client extends SoapClient
                     $this->baseSoapUrl = $this->defaultBaseSoapUrl;
 				}
 			}
+			if (array_key_exists('useOAuth2Authentication', $params))
+			{
+                $this->useOAuth2Authentication = $params['useOAuth2Authentication'];
+			}
+            if (array_key_exists('accountId', $params))
+            {
+                $this->accountId = $params['accountId'];
+            }
+            if (array_key_exists('scope', $params))
+            {
+                $this->scope = $params['scope'];
+            }
+			if (array_key_exists('applicationType', $params))
+			{
+				$this->applicationType = $params['applicationType'];
+			}
+			if (array_key_exists('redirectURI', $params))
+			{
+				$this->redirectURI = $params['redirectURI'];
+			}
+			if (array_key_exists('authorizationCode', $params))
+			{
+				$this->authorizationCode = $params['authorizationCode'];
+			}
 		}
 
 		$this->debugSOAP = $debug;
-		
-		if (!property_exists($this,'clientId') || is_null($this->clientId) || !property_exists($this,'clientSecret') || is_null($this->clientSecret)){
-			throw new Exception('clientid or clientsecret is null: Must be provided in config file or passed when instantiating ET_Client');
+
+		if (empty($this->applicationType)){
+			$this->applicationType = 'server';
 		}
-		
+
+		if($this->applicationType == 'public' || $this->applicationType == 'web'){
+			if (empty($this->redirectURI) || empty($this->authorizationCode)){
+				throw new Exception('redirectURI or authorizationCode is null: Must be provided in config file or passed when instantiating ET_Client');
+			}
+		}
+
+		if($this->applicationType == 'public'){
+			if (empty($this->clientId)){
+				throw new Exception('clientid is null: Must be provided in config file or passed when instantiating ET_Client');
+			}
+		}
+		else {
+			if (empty($this->clientId) || empty($this->clientSecret)) {
+				throw new Exception('clientid or clientsecret is null: Must be provided in config file or passed when instantiating ET_Client');
+			}
+		}
+
 		if ($getWSDL){$this->CreateWSDL($this->wsdlLoc);}
 		
 		if ($params && array_key_exists('jwt', $params)){
@@ -213,11 +283,11 @@ class ET_Client extends SoapClient
             }
 		}
 
-		$context = stream_context_create([
-			'ssl' => [
-				'verify_peer' => ET_Util::shouldVerifySslPeer($this->sslVerifyPeer)
-			]
-		]);
+        $context = stream_context_create([
+            'ssl' => [
+                'verify_peer' => ET_Util::shouldVerifySslPeer($this->sslVerifyPeer)
+            ]
+        ]);
 
         $soapOptions = array(
 			'stream_context' => $context
@@ -246,7 +316,10 @@ class ET_Client extends SoapClient
 	 */	
 	function refreshToken($forceRefresh = false) 
 	{
-		
+		if ($this->useOAuth2Authentication === true){
+            $this->refreshTokenWithOAuth2($forceRefresh);
+            return;
+		}
 		if (property_exists($this, "sdl") && $this->sdl == 0){
 			parent::__construct($this->xmlLoc, array('trace'=>1, 'exceptions'=>0));	
 		}
@@ -292,6 +365,77 @@ class ET_Client extends SoapClient
 			throw new Exception('Unable to validate App Keys(ClientID/ClientSecret) provided.: '.$e->getMessage());
 		}
 	}
+
+	function createPayloadForOauth2(){
+		$payload = new stdClass();
+
+        $payload->client_id = $this->clientId;
+		if($this->applicationType != 'public') {
+            $payload->client_secret = $this->clientSecret;
+		}
+
+		$refreshKey = $this->getRefreshToken(null);
+		if(!empty($refreshKey)){
+            $payload->grant_type = 'refresh_token';
+            $payload->refresh_token = $refreshKey;
+		} else if($this->applicationType == 'public' || $this->applicationType == 'web'){
+            $payload->grant_type = 'authorization_code';
+            $payload->code = $this->authorizationCode;
+            $payload->redirect_uri = $this->redirectURI;
+		} else {
+            $payload->grant_type = 'client_credentials';
+		}
+
+		if (!empty(trim($this->accountId))){
+            $payload->account_id = $this->accountId;
+		}
+		if (!empty(trim($this->scope))){
+            $payload->scope = $this->scope;
+		}
+
+		return $payload;
+	}
+
+    function refreshTokenWithOAuth2($forceRefresh = false)
+    {
+        if (property_exists($this, "sdl") && $this->sdl == 0){
+            parent::__construct($this->xmlLoc, array('trace'=>1, 'exceptions'=>0));
+        }
+        try {
+            $currentTime = new DateTime();
+            if (is_null($this->getAuthTokenExpiration($this->tenantKey))){
+                $timeDiff = 0;
+            } else {
+                $timeDiff = $currentTime->diff($this->getAuthTokenExpiration($this->tenantKey))->format('%i');
+                $timeDiff = $timeDiff  + (60 * $currentTime->diff($this->getAuthTokenExpiration($this->tenantKey))->format('%H'));
+            }
+            if (is_null($this->getAuthToken($this->tenantKey)) || ($timeDiff < 5) || $forceRefresh  ){
+
+                $url = $this->baseAuthUrl."/v2/token";
+
+                $jsonRequest = $this->createPayloadForOauth2();
+
+                $authResponse = ET_Util::restPost($url, json_encode($jsonRequest), $this);
+                $authObject = json_decode($authResponse->body);
+
+                if ($authResponse && property_exists($authObject,"access_token")){
+                    $dv = new DateInterval('PT'.$authObject->expires_in.'S');
+                    $newexpTime = new DateTime();
+                    $this->setAuthToken($this->tenantKey, $authObject->access_token, $newexpTime->add($dv));
+                    $this->setInternalAuthToken($this->tenantKey, $authObject->access_token);
+                    $this->baseUrl = $authObject->rest_instance_url;
+                    $this->baseSoapUrl= $authObject->soap_instance_url."Service.asmx";
+					if (property_exists($authObject,'refresh_token')){
+						$this->setRefreshToken($this->tenantKey, $authObject->refresh_token);
+					}
+                } else {
+                    throw new Exception('Unable to validate App Keys(ClientID/ClientSecret) provided, requestToken response:'.$authResponse->body );
+                }
+            }
+        } catch (Exception $e) {
+            throw new Exception('Unable to validate App Keys(ClientID/ClientSecret) provided.: '.$e->getMessage());
+        }
+    }
 	/**
 	 * Returns the  HTTP code return by the last SOAP/Rest call
 	 *
@@ -379,12 +523,19 @@ class ET_Client extends SoapClient
 	{
 		$doc = new DOMDocument();
 		$doc->loadXML($request);
-		$objWSSE = new WSSESoap($doc);
-		$objWSSE->addUserToken("*", "*", FALSE);
-		$this->addOAuth($doc, $this->getInternalAuthToken($this->tenantKey));
-				
-		$content = $objWSSE->saveXML();
-		$content_length = strlen($content);
+
+        if($this->useOAuth2Authentication === true){
+            $this->addOAuth($doc, $this->getAuthToken($this->tenantKey));
+			$content = $doc->saveXML();
+		}
+		else{
+            $objWSSE = new WSSESoap($doc);
+            $objWSSE->addUserToken("*", "*", FALSE);
+			$this->addOAuth($doc, $this->getInternalAuthToken($this->tenantKey));
+
+			$content = $objWSSE->saveXML();
+		}
+
 		if ($this->debugSOAP){
 			error_log ('FuelSDK SOAP Request: ');
 			error_log (str_replace($this->getInternalAuthToken($this->tenantKey),"REMOVED",$content));
@@ -432,7 +583,6 @@ class ET_Client extends SoapClient
 		$soapPFX = $envelope->prefix;
 		$SOAPXPath = new DOMXPath($doc);
 		$SOAPXPath->registerNamespace('wssoap', $soapNS);
-        $SOAPXPath->registerNamespace('wswsse', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd');
 
 		$headers = $SOAPXPath->query('//wssoap:Envelope/wssoap:Header');
 		$header = $headers->item(0);
@@ -441,11 +591,17 @@ class ET_Client extends SoapClient
 			$envelope->insertBefore($header, $envelope->firstChild);
 		}
 
-		$authnode = $soapDoc->createElementNS('http://exacttarget.com', 'oAuth');
+		if ($this->useOAuth2Authentication === true){
+            $authnode = $soapDoc->createElementNS('http://exacttarget.com','fueloauth',$token);
+		}
+		else{
+            $SOAPXPath->registerNamespace('wswsse', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd');
+
+            $authnode = $soapDoc->createElementNS('http://exacttarget.com', 'oAuth');
+            $oauthtoken = $soapDoc->createElementNS(null,'oAuthToken',$token);
+            $authnode->appendChild($oauthtoken);
+		}
 		$header->appendChild($authnode);
-		
-		$oauthtoken = $soapDoc->createElementNS(null,'oAuthToken',$token);
-		$authnode->appendChild($oauthtoken);
 	}
 
 	/** 
@@ -541,7 +697,7 @@ class ET_Client extends SoapClient
 	 * @param string $tenantKey
 	 * @return string Refresh token for the tenant
 	 */
-	function getRefreshToken($tenantKey) 
+	public function getRefreshToken($tenantKey)
 	{
 		$tenantKey = $tenantKey == null ? $this->tenantKey : $tenantKey;	
 		if ($this->tenantTokens[$tenantKey] == null) {
@@ -790,7 +946,15 @@ class ET_Client extends SoapClient
 		$sendResponse = $postC->post();
 		return $sendResponse;
 	}
-	
+
+    /**
+	* Function for basic field validation (present and neither empty nor only white space)
+	 *
+	 * @param string $str string to be validated
+	 */
+	function isNullOrEmptyString($str){
+        return (!isset($str) || trim($str) === '');
+    }
 }
 
 ?>
