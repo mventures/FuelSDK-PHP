@@ -657,10 +657,12 @@ class ET_Client extends SoapClient
 	*/
 	function getInternalAuthToken($tenantKey) 
 	{
-		$tenantKey = $tenantKey == null ? $this->tenantKey : $tenantKey;	
-		if ($this->tenantTokens[$tenantKey] == null) {
-			$this->tenantTokens[$tenantKey] = array();
-		}
+    $tenantKey = $tenantKey == null ? $this->tenantKey : $tenantKey;
+    
+    if (!isset($this->tenantTokens) || !isset($this->tenantTokens[$tenantKey])) {
+      return null;
+    }
+
 		return isset($this->tenantTokens[$tenantKey]['internalAuthToken'])
 			? $this->tenantTokens[$tenantKey]['internalAuthToken']
 			: null;
