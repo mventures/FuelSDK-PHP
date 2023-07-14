@@ -66,10 +66,24 @@ class ET_Client extends SoapClient
 	 */
 	public $baseUrl;
 
-	private $wsdlLoc, $debugSOAP, $lastHTTPCode, $clientId,
-			$clientSecret, $appsignature, $endpoint,
-			$tenantTokens, $tenantKey, $xmlLoc, $baseAuthUrl, $baseSoapUrl,
-			$useOAuth2Authentication, $accountId, $redirectURI, $applicationType, $authorizationCode, $scope;
+	private $wsdlLoc;
+  private $debugSOAP;
+  private $lastHTTPCode;
+  private $clientId;
+  private $clientSecret;
+  private $appsignature;
+  private $endpoint;
+  private $tenantTokens = [];
+  private $tenantKey;
+  private $xmlLoc;
+  private $baseAuthUrl;
+  private $baseSoapUrl;
+  private $useOAuth2Authentication;
+  private $accountId;
+  private $redirectURI;
+  private $applicationType;
+  private $authorizationCode;
+  private $scope;
 
 	private $defaultBaseSoapUrl = 'https://webservice.exacttarget.com/Service.asmx';
 
@@ -98,7 +112,6 @@ class ET_Client extends SoapClient
 	 */
 	function __construct($getWSDL = false, $debug = false, $params = null)
 	{
-		$tenantTokens = array();
 		$config = false;
 
 		$this->xmlLoc = 'ExactTargetWSDL.xml';
@@ -610,13 +623,8 @@ class ET_Client extends SoapClient
 	*/
 	public function getAuthToken($tenantKey = null)
 	{
-		$tenantKey = $tenantKey == null ? $this->tenantKey : $tenantKey;
-		if ($this->tenantTokens[$tenantKey] == null) {
-			$this->tenantTokens[$tenantKey] = array();
-		}
-		return isset($this->tenantTokens[$tenantKey]['authToken'])
-			? $this->tenantTokens[$tenantKey]['authToken']
-			: null;
+		$tenantKey ??= $this->tenantKey;
+		return $this->tenantTokens[$tenantKey]['authToken'] ?? null;
 	}
 
 	/**
@@ -627,9 +635,6 @@ class ET_Client extends SoapClient
 	*/
 	function setAuthToken($tenantKey, $authToken, $authTokenExpiration)
 	{
-		if ($this->tenantTokens[$tenantKey] == null) {
-			$this->tenantTokens[$tenantKey] = array();
-		}
 		$this->tenantTokens[$tenantKey]['authToken'] = $authToken;
 		$this->tenantTokens[$tenantKey]['authTokenExpiration'] = $authTokenExpiration;
 	}
@@ -641,13 +646,8 @@ class ET_Client extends SoapClient
 	*/
 	function getAuthTokenExpiration($tenantKey)
 	{
-		$tenantKey = $tenantKey == null ? $this->tenantKey : $tenantKey;
-		if ($this->tenantTokens[$tenantKey] == null) {
-			$this->tenantTokens[$tenantKey] = array();
-		}
-		return isset($this->tenantTokens[$tenantKey]['authTokenExpiration'])
-			? $this->tenantTokens[$tenantKey]['authTokenExpiration']
-			: null;
+		$tenantKey ??= $this->tenantKey;
+    return $this->tenantTokens[$tenantKey]['authTokenExpiration'] ?? null;
 	}
 
 	/**
@@ -666,10 +666,8 @@ class ET_Client extends SoapClient
 	* @param  string $tenantKey
 	* @param string $internalAuthToken
 	*/
-	function setInternalAuthToken($tenantKey, $internalAuthToken) {
-		if ($this->tenantTokens[$tenantKey] == null) {
-			$this->tenantTokens[$tenantKey] = array();
-		}
+	function setInternalAuthToken($tenantKey, $internalAuthToken)
+  {
 		$this->tenantTokens[$tenantKey]['internalAuthToken'] = $internalAuthToken;
 	}
 
@@ -680,9 +678,6 @@ class ET_Client extends SoapClient
 	*/
 	function setRefreshToken($tenantKey, $refreshToken)
 	{
-		if ($this->tenantTokens[$tenantKey] == null) {
-			$this->tenantTokens[$tenantKey] = array();
-		}
 		$this->tenantTokens[$tenantKey]['refreshToken'] = $refreshToken;
 	}
 
@@ -694,13 +689,8 @@ class ET_Client extends SoapClient
 	 */
 	public function getRefreshToken($tenantKey)
 	{
-		$tenantKey = $tenantKey == null ? $this->tenantKey : $tenantKey;
-		if ($this->tenantTokens[$tenantKey] == null) {
-			$this->tenantTokens[$tenantKey] = array();
-		}
-		return isset($this->tenantTokens[$tenantKey]['refreshToken'])
-			? $this->tenantTokens[$tenantKey]['refreshToken']
-			: null;
+    $tenantKey ??= $this->tenantKey;
+		return $this->tenantTokens[$tenantKey]['refreshToken'] ?? null;
 	}
 
 	/**
